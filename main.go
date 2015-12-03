@@ -1,9 +1,9 @@
 package main
 
 import (
-	"flag"
 	"github.com/boombuler/barcode"
 	"github.com/boombuler/barcode/qr"
+	"github.com/ianschenck/envflag"
 	"image/png"
 	"log"
 	"net"
@@ -42,8 +42,8 @@ func (s httpServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func init() {
-	flag.StringVar(&addr, "addr", "127.0.0.1:9001", "listen address")
-	flag.IntVar(&size, "size", 160, "barcode dimension")
+	envflag.StringVar(&addr, "QRD_LISTEN", "127.0.0.1:9001", "listen address")
+	envflag.IntVar(&size, "QRD_SIZE", 160, "barcode dimension")
 }
 
 func main() {
@@ -51,7 +51,7 @@ func main() {
 		l   net.Listener
 		err error
 	)
-	flag.Parse()
+	envflag.Parse()
 
 	if size < 100 {
 		size = 100
