@@ -9,11 +9,12 @@ import (
 	"net"
 	"net/http"
 	"net/http/fcgi"
+	"strconv"
 )
 
 var (
-	addr string
-	size int
+	addr      string
+	dimension int
 )
 
 type httpServer struct{}
@@ -23,6 +24,13 @@ func (s httpServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if str == "" {
 		log.Print("empty content")
 		return
+	}
+
+	size := validSize(dimension)
+	if s := r.FormValue("s"); s != "" {
+		if i, err := strconv.ParseInt(s, 10, 64); err == nil {
+			size = validSize(int(i))
+		}
 	}
 
 	w.Header().Set("Content-Type", "image/png")
@@ -43,7 +51,7 @@ func (s httpServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func init() {
 	envflag.StringVar(&addr, "QRD_LISTEN", "127.0.0.1:9001", "listen address")
-	envflag.IntVar(&size, "QRD_SIZE", 160, "barcode dimension")
+	envflag.IntVar(&dimension, "QRD_DIMENSION", 160, "barcode dimension")
 }
 
 func main() {
@@ -52,12 +60,6 @@ func main() {
 		err error
 	)
 	envflag.Parse()
-
-	if size < 100 {
-		size = 100
-	} else if size > 720 {
-		size = 720
-	}
 
 	if addr[0] == '/' {
 		l, err = net.Listen("unix", addr)
@@ -72,4 +74,13 @@ func main() {
 	log.Printf("Start fcgi service at addr %s", addr)
 	srv := new(httpServer)
 	fcgi.Serve(l, srv)
+}
+
+func validSize(dimension int) int {
+	if dimension < 60 {
+		return 60
+	} else if dimension > 720 {
+		return 720
+	}
+	return dimension
 }
