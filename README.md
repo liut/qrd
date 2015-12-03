@@ -22,4 +22,12 @@ QRD
 
 ## test
 
-browse: http://localhost/qr?c=Hello%20QRcode
+browse: `/qr?c=Hello%20QRcode`
+
+## `.env`
+
+````
+QRD_LISTEN="127.0.0.1:9001"
+QRD_SIZE=160
+````
+
