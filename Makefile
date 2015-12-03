@@ -9,7 +9,7 @@ LDFLAGS:=-X main.buildVersion=$(TAG)
 all: main
 
 main:
-	echo "Building main"
+	echo "Building $(NAME)"
 	go build -ldflags "$(LDFLAGS)"
 
 
