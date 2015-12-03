@@ -69,7 +69,7 @@ func main() {
 		log.Println(err)
 	}
 
-	log.Printf("Start x-bar service at addr %s", addr)
+	log.Printf("Start fcgi service at addr %s", addr)
 	srv := new(httpServer)
 	fcgi.Serve(l, srv)
 }
