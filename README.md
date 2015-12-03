@@ -1,7 +1,7 @@
 QRD
 ====
 
-    qrcode generate with fastcgi service
+    QRcode generate with fastcgi service
 
 
 ## build
