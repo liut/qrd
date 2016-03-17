@@ -1,1 +1,1 @@
-fcgi: rerun --build tuluu.com/liut/qrd
+fcgi: rerun --build lcgc/liut/qrd
