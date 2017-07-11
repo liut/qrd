@@ -1,20 +1,24 @@
 package main
 
 import (
-	"github.com/boombuler/barcode"
-	"github.com/boombuler/barcode/qr"
-	"github.com/ianschenck/envflag"
+	"flag"
 	"image/png"
 	"log"
 	"net"
 	"net/http"
 	"net/http/fcgi"
 	"strconv"
+
+	"github.com/boombuler/barcode"
+	"github.com/boombuler/barcode/qr"
+	envcfg "github.com/wealthworks/envflagset"
 )
 
 var (
+	fs        *flag.FlagSet
 	addr      string
 	dimension int
+	version   = "dev"
 )
 
 type httpServer struct{}
@@ -50,8 +54,9 @@ func (s httpServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func init() {
-	envflag.StringVar(&addr, "QRD_LISTEN", "127.0.0.1:9001", "listen address")
-	envflag.IntVar(&dimension, "QRD_DIMENSION", 160, "barcode dimension")
+	fs = envcfg.New("qrd", version)
+	fs.StringVar(&addr, "listen", "127.0.0.1:9001", "listen address")
+	fs.IntVar(&dimension, "dimension", 160, "barcode dimension")
 }
 
 func main() {
@@ -59,7 +64,7 @@ func main() {
 		l   net.Listener
 		err error
 	)
-	envflag.Parse()
+	envcfg.Parse()
 
 	if addr[0] == '/' {
 		l, err = net.Listen("unix", addr)

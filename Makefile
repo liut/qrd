@@ -3,7 +3,7 @@
 
 NAME:=qrd
 TAG:=`git describe --tags`
-LDFLAGS:=-X main.buildVersion=$(TAG)
+LDFLAGS:=-X main.version=$(TAG)
 
 
 all: main
