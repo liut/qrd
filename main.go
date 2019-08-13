@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"image/png"
+	"io"
 	"log"
 	"net"
 	"net/http"
@@ -12,6 +13,11 @@ import (
 	"github.com/boombuler/barcode"
 	"github.com/boombuler/barcode/qr"
 	envcfg "github.com/wealthworks/envflagset"
+)
+
+const (
+	maxSize = 720
+	minSize = 60
 )
 
 var (
@@ -26,11 +32,12 @@ type httpServer struct{}
 func (s httpServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	str := r.FormValue("c")
 	if str == "" {
-		log.Print("empty content")
+		log.Print("empty content", r.RequestURI)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	size := validSize(dimension)
+	size := dimension
 	if s := r.FormValue("s"); s != "" {
 		if i, err := strconv.ParseInt(s, 10, 64); err == nil {
 			size = validSize(int(i))
@@ -39,18 +46,28 @@ func (s httpServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "image/png")
 
-	qrcode, err := qr.Encode(str, qr.Q, qr.Auto) // L,M,Q,H
+	err := genQRcode(w, str, size)
 	if err != nil {
-		log.Println(err)
-	} else {
-		qrcode, err = barcode.Scale(qrcode, size, size)
-		if err != nil {
-			log.Println(err)
-		} else {
-			log.Printf("generated barcode: %s", qrcode.Content())
-			png.Encode(w, qrcode)
-		}
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
+}
+
+func genQRcode(w io.Writer, text string, size int) error {
+
+	qrcode, err := qr.Encode(text, qr.Q, qr.Auto) // L,M,Q,H
+	if err != nil {
+		log.Printf("encode ERR %s", err)
+		return err
+	}
+	qrcode, err = barcode.Scale(qrcode, size, size)
+	if err != nil {
+		log.Printf("scale ERR %s", err)
+		return err
+	}
+
+	// log.Printf("generated barcode: %s", qrcode.Content())
+	return png.Encode(w, qrcode)
 }
 
 func init() {
@@ -65,6 +82,7 @@ func main() {
 		err error
 	)
 	envcfg.Parse()
+	dimension = validSize(dimension)
 
 	if addr[0] == '/' {
 		l, err = net.Listen("unix", addr)
@@ -73,7 +91,7 @@ func main() {
 	}
 
 	if err != nil {
-		log.Println(err)
+		log.Fatal(err)
 	}
 
 	log.Printf("Start fcgi service at addr %s", addr)
@@ -82,10 +100,10 @@ func main() {
 }
 
 func validSize(dimension int) int {
-	if dimension < 60 {
-		return 60
-	} else if dimension > 720 {
-		return 720
+	if dimension < minSize {
+		return minSize
+	} else if dimension > maxSize {
+		return maxSize
 	}
 	return dimension
 }

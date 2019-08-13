@@ -1,1 +1,1 @@
-fcgi: rerun --build lcgc/liut/qrd
+fcgi: rerun --build fhyx.tech/platform/qrd

@@ -16,6 +16,7 @@ main:
 clean:
 	rm -rf dist
 	rm -f $(NAME)
+	rm -f $(NAME)-*.tar.?z
 
 dist: clean
 	mkdir -p dist/linux/amd64 && GOOS=linux GOARCH=amd64 go build -ldflags "$(LDFLAGS)" -o dist/linux/amd64/$(NAME)
@@ -24,6 +25,3 @@ dist: clean
 release: dist
 	tar -cvJf $(NAME)-linux-amd64-$(TAG).tar.xz -C dist/linux/amd64 $(NAME)
 	tar -cvJf $(NAME)-darwin-amd64-$(TAG).tar.xz -C dist/darwin/amd64 $(NAME)
-
-release-clean:
-	rm -f *.tar.xz

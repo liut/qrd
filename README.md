@@ -24,7 +24,7 @@ QRD
 
 browse: `/qr?c=Hello%20QRcode`
 
-## `.env`
+## Environment
 
 ````
 QRD_LISTEN="127.0.0.1:9001"
